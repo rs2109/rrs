@@ -34,8 +34,13 @@ import com.tech.bahera.dto.Address;
 import com.tech.bahera.dto.AuthToken;
 import com.tech.bahera.dto.EmailUser;
 import com.tech.bahera.dto.LoginUser;
+import com.tech.bahera.dto.StoreRecordFiles;
 import com.tech.bahera.dto.User;
+import com.tech.bahera.dtoImpl.LabDAOImpl;
 import com.tech.bahera.dtoImpl.UserServeImpl;
+import com.tech.bahera.util.CustomErrorType;
+
+import io.jsonwebtoken.lang.Collections;
 
 //@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201","http://192.168.1.20:4200", "http://192.168.43.99:4200","http://217.136.61.67:4200", "http://109.142.21.105:4200","http://109.142.21.105:80","http://109.142.21.105:8080"} )
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -56,6 +61,8 @@ public class UserController {
     @Autowired
 	private BCryptPasswordEncoder bcryptEncoder;
  
+    @Autowired
+	private LabDAOImpl labDAOImpl;
     
     @PutMapping("/uaddress")
     public boolean updateUserAddress(@RequestBody Address addr) {
@@ -86,9 +93,9 @@ public class UserController {
 		return userService.loadUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());	
 	}
 	
-	@GetMapping("/customers")
+	@GetMapping("/users")
 	public List<User> getAllCustomer() {
-		System.out.println("Get all customers..:" );
+		System.out.println("Get all users..:" );
 		List<User> usList =  userService.loadAllUsers();
 		System.out.println(usList);
 		return usList;
@@ -112,10 +119,17 @@ public class UserController {
 		System.out.println("Going to create User:");
 		System.out.println(user);
 		
-//		if(userService.loadUserByEmail(user.getUsername()) != null) {
-//            return new ResponseEntity(new CustomErrorType("Email address " + 
-//		            user.getUsername() + " already exist."),HttpStatus.IM_USED);
-//        }
+		if(!user.getUsername().equals("randhirsingh21@gmail.com")) {
+			if(userService.loadUserByEmail(user.getUsername()) != null) {
+	            return new ResponseEntity(new CustomErrorType("Email address " + 
+			            user.getUsername() + " already exist."),HttpStatus.IM_USED);
+	        }
+			
+			user.setRole("user");
+			
+		}else {
+			user.setRole("admin");
+		}
 		
 		String pwd = user.getPassword();
 		if (pwd != null && pwd != "")
@@ -123,7 +137,6 @@ public class UserController {
 		else {
 			user.setPassword(bcryptEncoder.encode("abc123"));
 		}
-	
 		
 		//String dob= user.getDob();
 		
@@ -145,11 +158,12 @@ public class UserController {
 	public ResponseEntity<?> sendEmail(@RequestBody EmailUser user) {
 		System.out.println(user);
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
+        //mailSender.setHost("smtp.gmail.com");
+		mailSender.setHost("smtp.zoho.com");
         mailSender.setPort(465);
 
-        mailSender.setUsername("onlineappmailservice@gmail.com");
-        mailSender.setPassword("saharanpur_011");
+        mailSender.setUsername("info@ransoftservice.com");
+        mailSender.setPassword("bhanu_123");
 
         //from email id and password
         //System.out.println("Username is : " + String.valueOf(resourceList.get(0)).split("@")[0]);
@@ -167,11 +181,11 @@ public class UserController {
 		String strMsgSender = "<table style=\"width:100%\">\r\n" + 
 				"<tr ><td>Hi "+user.getUsername()+ ","+ "</td></tr>\r\n" + 
 				"<tr height = 20px></tr>\r\n" + 
-				"<tr ><td>Welcome to <a href=\"http://localhost:4200\">Ran Soft Service</a> Thank you for your query. We will reply soon on your query.</td></tr>\r\n" +  
+				"<tr ><td>Welcome to <a href=\"http://91.176.173.148:8009/ran\">Ran Soft Service</a> Thank you for your query. We will reply soon on your query.</td></tr>\r\n" +  
 				"<tr height = 80px></tr>\r\n" + 
 				"<tr ><td>Best Regards</td></tr>\r\n" + 
-				"<tr ><td>RRS Team</td></tr>         \r\n" + 
-				"<tr ><td><a href=\"http://localhost:4200\">Ran Soft Service</a></td></tr>				\r\n" +
+				"<tr ><td>RSS Team</td></tr>         \r\n" + 
+				"<tr ><td><a href=\"http://http://91.176.173.148:8009/ran\">Ran Soft Service</a></td></tr>				\r\n" +
 				"</table>\r\n" + 
 				"";
 
@@ -179,30 +193,29 @@ public class UserController {
 				"<tr ><td>"+user.getMessage()+ ","+ "</td></tr>\r\n" + 
 				"<tr height = 20px></tr>\r\n" +   
 				"<tr height = 80px></tr>\r\n" + 
-				"<tr ><td>Best Regards</td></tr>\r\n" + 
-				"<tr ><td>RSS Team</td></tr>         \r\n" + 
-				"<tr ><td><a href=\"http://localhost:4200\">Ran Soft Service</a></td></tr>				\r\n" +
+				
 				"</table>\r\n" + 
 				"";
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-            helper.setTo("randhirsingh21@gmail.com");
+            helper.setTo(user.getEmailId());
+            helper.setFrom("info@ransoftservice.com");
             helper.setSubject(user.getSubject());
             helper.setText(strMsgSender, true);
 
             //Checking Internet Connection and then sending the mail
             //if(OneMethod.isNetConnAvailable())
-                mailSender.send(mimeMessage);
+             mailSender.send(mimeMessage);
                 
             MimeMessageHelper help = new MimeMessageHelper(mimeMessage, true);
-            help.setTo(user.getEmailId());
+            help.setTo("randhir.singh@ransoftservice.com");
             help.setSubject(user.getSubject());
             help.setText(strMsg, true);
 
             //Checking Internet Connection and then sending the mail
             //if(OneMethod.isNetConnAvailable())
-            	//mailSender.send(mimeMessage);
+            mailSender.send(mimeMessage);
             //else
                 //JOptionPane.showMessageDialog(null, "No Internet Connection Found...");
             URI location = ServletUriComponentsBuilder
@@ -301,8 +314,14 @@ public class UserController {
         	final String token = jwtTokenUtil.generateToken(user);
         	
         		 user.setToken(token);
-        	//return ResponseEntity.ok(new AuthToken(token));
+        		 
+        		 List<StoreRecordFiles> userList = labDAOImpl.retrieveFileDetails(loginUser.getUsername());
+        		 System.out.println("StoreRecordFiles in :" + userList);
+        	     if (!Collections.isEmpty(userList)) {
+        	    	 user.setCvName(userList.get(0).getName());
+        	     }
         		 System.out.println("User is logged in :" + loginUser.getUsername());
+        		 System.out.println("User is logged in :" + user);
         		 return ResponseEntity.ok(user);
         }
         System.out.println("User is not authorize to log in :" + loginUser.getUsername());

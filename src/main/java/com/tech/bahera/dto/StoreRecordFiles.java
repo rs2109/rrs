@@ -16,9 +16,6 @@ public class StoreRecordFiles implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@Id
-    @Field
-    private String id;
 
 	@Field
     private String name;
@@ -26,6 +23,7 @@ public class StoreRecordFiles implements Serializable{
 	@Field
 	private String dateTime; 
 
+	@Id
     @Field
     private String emailId;
 
@@ -43,13 +41,6 @@ public class StoreRecordFiles implements Serializable{
 		this.dateTime = dateTime;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	public String getEmailId() {
 		return emailId;
@@ -85,7 +76,7 @@ public class StoreRecordFiles implements Serializable{
 
 	@Override
 	public String toString() {
-		return "createRecords [id=" + id + ", name=" + name + ", dateTime=" + dateTime + ", emailId=" + emailId
+		return "createRecords [name=" + name + ", dateTime=" + dateTime + ", emailId=" + emailId
 				+ ", docType=" + contentType + ", file=" + file + "]";
 	}
 

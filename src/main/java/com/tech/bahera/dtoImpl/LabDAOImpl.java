@@ -21,8 +21,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import com.tech.bahera.dto.StoreRecordFiles;
+import com.tech.bahera.dto.User;
 import com.tech.bahera.dto.UserRecord;
+
+import io.jsonwebtoken.lang.Collections;
 
 
 //@Repository("labDAO")
@@ -33,6 +37,11 @@ public class LabDAOImpl {
 	private MongoOperations mongoOperations;
 
 	public StoreRecordFiles saveFile(MultipartFile file, String email) {
+		
+		List<StoreRecordFiles> oldFileList = retrieveFileDetails(email);
+		if(!Collections.isEmpty(oldFileList)) {
+			deleteFileById(email);
+		}
 		StoreRecordFiles doc = new StoreRecordFiles();
 		try {
 			doc.setEmailId(email);
@@ -42,6 +51,13 @@ public class LabDAOImpl {
 			doc.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
 
 			mongoOperations.insert(doc);
+			
+			Query query = new Query(Criteria.where("_id").is(email));
+    		Update update = new Update();
+    		update.set("cvName", file.getOriginalFilename());
+    		mongoOperations.updateFirst(query, update, User.class);
+    		
+    		
 			System.out.println(doc);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -61,15 +77,17 @@ public class LabDAOImpl {
 	
 
 	public List<StoreRecordFiles> retrieveFileDetails(String email) {
-		Query query = new Query(Criteria.where("emailId").is(email));
+		
+		Query query = new Query(Criteria.where("_id").is(email));
 		return mongoOperations.find(query, StoreRecordFiles.class);
 
 	}
 
-	public boolean deleteFileById(String id, String email) {
+	public boolean deleteFileById(String email) {
 
-		System.out.println("Delete Record :" + id + ", " + email);
-		Query query = new Query(Criteria.where("_id").is(id).and("emailId").is(email));
+		System.out.println("Delete Record :"  + email);
+		//Query query = new Query(Criteria.where("_id").is(id).and("emailId").is(email));
+		Query query = new Query(Criteria.where("_id").is(email));
 		DeleteResult rs = mongoOperations.remove(query, StoreRecordFiles.class);
 		if (rs.getDeletedCount() > 0) {
 			System.out.println("Deleted Record :" + rs.getDeletedCount());

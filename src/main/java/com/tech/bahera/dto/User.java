@@ -28,6 +28,37 @@ public class User implements Serializable{
 	private String dob;
 	
 	private String token;
+	
+	private String cvPath;
+	
+	private String cvName;
+	
+	private String role;
+
+	
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public String getCvName() {
+		return cvName;
+	}
+
+	public void setCvName(String cvName) {
+		this.cvName = cvName;
+	}
+
+	public String getCvPath() {
+		return cvPath;
+	}
+
+	public void setCvPath(String cvPath) {
+		this.cvPath = cvPath;
+	}
 
 	public String getFirstName() {
 		return firstName;

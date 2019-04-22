@@ -51,29 +51,31 @@ public class UserFilesController {
 	@PostMapping("/upload")
 	public ResponseEntity<?> singleFileUpload(@RequestParam("file") MultipartFile multipart) {
 		System.out.println("Going to upload File contentType:"+ multipart.getContentType());
+		System.out.println("SecurityContextHolder.getContext().getAuthentication().getName():"+ SecurityContextHolder.getContext().getAuthentication().getName());
 		StoreRecordFiles res = labDAO.saveFile(multipart, SecurityContextHolder.getContext().getAuthentication().getName());
 		URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/mrest/createrecord")
                 .buildAndExpand(res.getName()).toUri();
 
-        return ResponseEntity.created(location).body(res.getId());
+        return ResponseEntity.created(location).body(res.getEmailId());
 		
 	}
 	
 	
-	/*@GetMapping("/file/{email}")
+	@GetMapping("/file/{email}")
 	@ResponseBody
-	public List<StoreRecordFiles> getFilesbyEmail(@PathVariable String email){
-		return labDAO.retrieveFileDetails(email);
+	public String getFilesbyEmail(@PathVariable String email){
+		System.out.println("Going to getFile details:"+ email);
+		return labDAO.retrieveFileDetails(email).get(0).getName();
 	    
-	} */
+	} 
 	
 	@PostMapping("/file")
 	@ResponseBody
 	public ResponseEntity<Resource> downloadFile(@RequestBody StoreRecordFiles req, HttpServletRequest request) throws IOException {
-		System.out.println("downloadFile is called."); 
+		System.out.println("downloadFile is called:" + req); 
 		// Load file as Resource
-		StoreRecordFiles rf = labDAO.downloadFile(req.getId());
+		StoreRecordFiles rf = labDAO.downloadFile(req.getEmailId());
 		Binary document = rf.getFile();
 		 
 		//File fl = new File(bfile.getData());

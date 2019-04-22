@@ -57,10 +57,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     	//http.cors();http.cors()
     	
-    	http.csrf().disable().
+    	/*http.csrf().disable().
         authorizeRequests()
         .antMatchers("/register", "/authenticate", "/token","/sendEmail")
-        .permitAll();
+        .permitAll();*/
+    	
+    	http.csrf().disable().
+        authorizeRequests()
+        .antMatchers("/", "/register", "/authenticate", "/token", "/sendEmail","/upload","/file/*", "/users", "/file")
+        .permitAll()
+        .anyRequest().authenticated()
+        .and()
+        .formLogin()
+        .and()
+        .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+http
+        .addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+
     	
     }
     

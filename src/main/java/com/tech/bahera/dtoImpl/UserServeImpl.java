@@ -48,7 +48,7 @@ public class UserServeImpl implements UserDetailsService{
 		List<User> la = mongoOperations.find(query, User.class);
 		
 		if(la.size() <= 0){
-			throw new UsernameNotFoundException("Invalid username or password.");
+			return null;
 		}
 		
 		return la.get(0);
@@ -96,6 +96,24 @@ public class UserServeImpl implements UserDetailsService{
     	}
         
     }
+    
+    public boolean updateUserCV(String userName, String cvName) {
+    	System.out.println("Client called updateUserCV userName:"+userName + "cvName:" + cvName);
+    	
+    		Query query = new Query(Criteria.where("_id").is(userName));
+    		Update update = new Update();
+    		update.set("cvName", cvName);
+    		
+    		UpdateResult us =  mongoOperations.updateFirst(query, update, User.class);
+    		if (us.isModifiedCountAvailable()) {
+    			return true;
+    		}
+    		else {
+    			return false;
+    		}
+    	
+        
+    }
   
     public Address getAddress(String email) {
     	Query query = new Query(Criteria.where("emailId").is(email));
@@ -107,5 +125,12 @@ public class UserServeImpl implements UserDetailsService{
         else {
         	return addList.get(0);
         }
+    }
+    
+    public void saveJobs(String email, String job) {
+    	Query query = new Query(Criteria.where("emailId").is(email));
+        List<Address> addList = (mongoOperations.find(query, Address.class));
+        
+        
     }
 }
